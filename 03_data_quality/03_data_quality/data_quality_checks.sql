@@ -127,6 +127,6 @@ WHERE descuento ~ '[^0-9%]';  -- regex postgres
    ========================================= */
 
 SELECT 
-    COUNT(*) AS total_filas,
-    SUM(CASE WHEN ventas <= 0 THEN 1 ELSE 0 END) AS ventas_invalidas
+   COUNT(*) AS total_filas,
+   SUM(CASE WHEN ventas <= 0 THEN 1 ELSE 0 END) AS ventas_invalidas
 FROM h_ventas;
