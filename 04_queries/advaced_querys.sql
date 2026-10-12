@@ -301,13 +301,13 @@ aggregated AS(
         ROW_NUMBER()OVER(
             PARTITION BY anyo
             ORDER BY SUM(ventas) - SUM(ventas * descuento_clean) DESC) AS ranking
-    FROM    
+    FROM
         base
 
     GROUP BY anyo, desc_pais
 )
 
-SELECT 
+SELECT
     anyo,
     desc_pais,
     total_sales - total_discount        AS net_sales,
@@ -316,7 +316,7 @@ FROM aggregated
 WHERE ranking <=3;
 
 
--- 14. porcentaje de ventas por país dentro de cada año (window functions)
+-- 14. porcentaje de ventas por país dentro de cada año (windows functions)
 WITH base AS (
     SELECT
         p.desc_pais,
@@ -362,3 +362,63 @@ SELECT
 
 FROM aggregated
 ORDER BY anyo, ranking;
+
+
+-- Ejercicio 15 — Ranking de ventas por país (RETOMO DESDE HACE MESES).
+SELECT 
+    id_fecha,
+    id_categoria,
+    id_pais,
+    id_tipo_tarjeta,
+    ventas,
+    row_number() over(PARTITION BY id_pais ORDER BY ventas DESC) AS ranking_venta
+from h_ventas;
+
+-----------------------------------------------------------------------------------------------------
+-- RANK() asigna la misma posición a las filas empatadas y deja saltos en la numeración posterior.
+-- ROW_NUMBER() asigna un número distinto a cada fila.
+-----------------------------------------------------------------------------------------------------
+
+-- Ejercicio 16 — Ranking de ventas por país con empates
+SELECT
+    id_fecha,
+    id_categoria,
+    id_pais,
+    id_tipo_tarjeta,
+    ventas,
+    rank() over(partition by id_pais order by ventas DESC) AS ranking_venta
+FROM h_ventas;
+
+
+-- Ejercicio 17 — Ranking de ventas por país con empates sin compartir posición y no debe haber saltos en la numeraciónSELECT
+SELECT
+    id_fecha,
+    id_categoria,
+    id_pais,
+    id_tipo_tarjeta,
+    ventas,
+    dense_rank() over(partition by id_pais order by ventas DESC) AS ranking_venta
+FROM h_ventas;
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+--ROW_NUMBER() numera cada fila individualmente; RANK() comparte posición y deja saltos; DENSE_RANK() comparte posición sin dejar saltos.
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+-- Ejercicio 18 — Top 3 posiciones de venta por país
+with base AS (
+    SELECT
+        id_fecha,
+        id_categoria,
+        id_pais,
+        id_tipo_tarjeta,
+        ventas,
+        dense_rank() over(partition by id_pais order by ventas DESC) AS ranking_venta
+    FROM h_ventas
+)
+select
+*
+from base
+    where ranking_venta <=3
+    order by id_pais asc
+
